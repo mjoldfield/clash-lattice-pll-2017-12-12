@@ -29,7 +29,7 @@ set -xe
 
 # generate verilog: this has to run from the compiler dir to get the
 # dev version of Clash
-stack exec -- clash -Wall -hidir ../blinky/obj -odir ../blinky/obj -fclash-hdldir ../blinky/verilog --verilog -i../blinky ../blinky/LED1.hs
+stack exec -- clash -Wall -hidir ../blinky/obj -odir ../blinky/obj -fclash-hdldir ../blinky--verilog -i../blinky ../blinky/LED1.hs
 
 # Now over to blinky dir
 cd ../blinky
