@@ -47,21 +47,6 @@ flipper clk rst n =  mealy clk rst go (0,0) $ zeros clk rst
 zeros :: Clock dom gated -> Reset dom sync -> Signal dom Bit
 zeros clk rst = register clk rst (0 :: Bit) (pure 0)
 
-impFree :: Clock dom gated   -- ^ 'Clock' to synchronize to
-        -> Reset dom synchronous
-        -> (s -> (s,o)) -- ^ Transfer function in mealy machine form without input
-                             -- @state -> (newstate,output)@
-        -> s                 -- ^ Initial state
-        -> Signal dom o
-impFree clk rst f iS = let (s',o) = unbundle $ f <$> s
-                           s      = register clk rst iS s'
-                       in o
-
-flipper' :: (Num a, Eq a) => Clock dom gated -> Reset dom sync -> a -> Signal dom Bit
-flipper' clk rst n = impFree clk rst go (0,0)
-  where  go (i,x) | i == n    = ((0,   complement x), complement x)
-                  | otherwise = ((i+1,     x),     x)
-
 blinky :: Clock dom gated -> Reset dom sync -> Signal dom Bit
 blinky clk rst = flipper clk rst (24999999 :: Unsigned 32)
 
