@@ -3,7 +3,9 @@ module LED1
     topEntity 
   ) where
 
-import Clash.Prelude
+
+
+import Clash.Explicit.Prelude
 import Lattice
 
 
@@ -35,18 +37,33 @@ type ClkSys = 'Dom "system" 10000
 --  50MHz => 20,000ps
 type Clk50  = 'Dom "main" 20000
 
-
-flipper :: (Num a, Eq a) => a -> Signal Clk50 Bit
-flipper n =  mealy go (0,0) $ osc
+--  do (n-1) cycles of 0, then (n-1) cycles of 1, and repeat..
+flipper :: (Num a, Eq a) => Clock dom gated -> Reset dom sync -> a -> Signal dom Bit
+flipper clk rst n =  mealy clk rst go (0,0) $ zeros clk rst
    where go (i,x) _ | i == n    = ((0,   complement x), complement x)
                     | otherwise = ((i+1,     x),     x)
 
---osc :: Signal Clk50 Bit
-osc = register 0 (pure 0)
+-- a signal of 0 just to feed into the mealy machine
+zeros :: Clock dom gated -> Reset dom sync -> Signal dom Bit
+zeros clk rst = register clk rst (0 :: Bit) (pure 0)
 
+impFree :: Clock dom gated   -- ^ 'Clock' to synchronize to
+        -> Reset dom synchronous
+        -> (s -> (s,o)) -- ^ Transfer function in mealy machine form without input
+                             -- @state -> (newstate,output)@
+        -> s                 -- ^ Initial state
+        -> Signal dom o
+impFree clk rst f iS = let (s',o) = unbundle $ f <$> s
+                           s      = register clk rst iS s'
+                       in o
 
-blinky :: Signal Clk50 Bit
-blinky = flipper 29999999
+flipper' :: (Num a, Eq a) => Clock dom gated -> Reset dom sync -> a -> Signal dom Bit
+flipper' clk rst n = impFree clk rst go (0,0)
+  where  go (i,x) | i == n    = ((0,   complement x), complement x)
+                  | otherwise = ((i+1,     x),     x)
+
+blinky :: Clock dom gated -> Reset dom sync -> Signal dom Bit
+blinky clk rst = flipper clk rst (24999999 :: Unsigned 32)
 
 {-# ANN topEntity
   (defTop
@@ -57,6 +74,6 @@ blinky = flipper 29999999
 topEntity :: Clock ClkSys 'Source
           -> Signal Clk50 Bit
 topEntity clk = let (clk', rst) = myPLL clk (pure True)
-          in withClockReset clk' rst blinky
+          in blinky clk' rst
 
 

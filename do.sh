@@ -11,12 +11,21 @@
 #    foo/bar/clash-compiler
 #    foo/bar/blinky
 #
-# So to run it:
+# We also need a symlink to 'redirect' the verilog output:
+#
+#   $ cd foo/bar/clash-compiler
+#   $ ln -s verilog ../blinky/verilog
+#
+# To run it:
 #
 #   $ cd foo/bar/clash-compiler
 #   $ ../blinky/do.sh
+#
 
 set -xe
+
+# make sure verilog directory is setup
+mkdir -p ../blinky/verilog
 
 # move to blinky dir and clean
 (cd ../blinky; ls ; rm -rf verilog/* *.blif *.log *.v obj *.asc *.bin *.exe)
