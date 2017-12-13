@@ -1,0 +1,5 @@
+# 100MHz on clock oscillator
+set_io system1000  15
+# On-board LEDs
+set_io LED0 40
+#set_io led1 51
