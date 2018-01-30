@@ -35,8 +35,8 @@ stack exec -- clash -Wall -hidir ../blinky/obj -odir ../blinky/obj -fclash-hdldi
 cd ../blinky
 
 # hack error in source
-perl -pi -e 's/\QUSER_SIGNAL_TO_GLOBAL_BUFFER(globalClk)\E/USER_SIGNAL_TO_GLOBAL_BUFFER(globalClk[0])/' \
-     verilog/LED1/LED1/Lattice_ice40Top.v
+#perl -pi -e 's/\QUSER_SIGNAL_TO_GLOBAL_BUFFER(globalClk)\E/USER_SIGNAL_TO_GLOBAL_BUFFER(globalClk[0])/' \
+#     verilog/LED1/LED1/Lattice_ice40Top.v
 
 
 # generate yosys synthesis script
