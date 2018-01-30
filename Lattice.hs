@@ -288,7 +288,15 @@ ice40Top divr divf divq filterRange inClk inRst =
       -- convert the locked output port, signifying when the PLL clock frequency
       -- is locked, to a reset signal. this locked port is tied to the input reset
       -- signal for resets.
-      lockedRst = unsafeToAsyncReset locked
+  
+      -- the locked signal from the PLL is defined thus:
+      --
+      --     When High, indicates that the PLL output is phase aligned
+      --     or locked to the input reference clock.
+      --
+      -- and I think that's the opposite of what we need for reset.
+
+      lockedRst = unsafeToAsyncReset $ fmap not locked
 
       -- synchronize the reset to the buffered clock, to give our final,
       -- proper Reset line.
