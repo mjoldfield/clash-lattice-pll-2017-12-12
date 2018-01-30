@@ -34,6 +34,11 @@ stack exec -- clash -Wall -hidir ../blinky/obj -odir ../blinky/obj -fclash-hdldi
 # Now over to blinky dir
 cd ../blinky
 
+# hack error in source
+perl -pi -e 's/\QUSER_SIGNAL_TO_GLOBAL_BUFFER(globalClk)\E/USER_SIGNAL_TO_GLOBAL_BUFFER(globalClk[0])/' \
+     verilog/LED1/LED1/Lattice_ice40Top.v
+
+
 # generate yosys synthesis script
 {
     FILES=`find verilog/ -type f -iname '*.v' | grep -v test`
@@ -47,7 +52,7 @@ cd ../blinky
 yosys -v3 -l synth.log synth.ys
 
 # This is for the iCE40HX1K on the Olimex EVB board
-arachne-pnr -d 1k -o led1-1k.asc -p pins.pcf -P vq100 led1.blif
+arachne-pnr -d 1k -o led1-1k.asc -p pins-1k.pcf -P vq100 led1.blif
 icepack led1-1k.asc led1-1k.bin
 
 
