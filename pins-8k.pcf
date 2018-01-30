@@ -1,0 +1,7 @@
+# Pin definitions for Lattice iCE40-HX8K breakout board
+
+# 12MHz on clock oscillator
+set_io CLK  J3
+
+# On-board LEDs
+set_io LED0 B5

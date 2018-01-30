@@ -4,38 +4,38 @@ module LED1
   ) where
 
 
-
 import Clash.Explicit.Prelude
 import Lattice
 
+-- System clock fed into FPGA
+-- 12MHz => 83,333ps
+type ClkSys = 'Dom "system" 83333
 
--- F_PLLIN:   100.000 MHz (given)
--- F_PLLOUT:   50.000 MHz (requested)
--- F_PLLOUT:   50.000 MHz (achieved)
+-- PLL generated 60MHz clock
+--  60MHz => 16,667pm
+type ClkPLL  = 'Dom "main" 16667
+
+--
+-- F_PLLIN:    12.000 MHz (given)
+-- F_PLLOUT:   60.000 MHz (requested)
+-- F_PLLOUT:   60.000 MHz (achieved)
 -- 
 -- FEEDBACK: SIMPLE
--- F_PFD:  100.000 MHz
--- F_VCO:  800.000 MHz
+-- F_PFD:   12.000 MHz
+-- F_VCO:  960.000 MHz
 -- 
 -- DIVR:  0 (4'b0000)
--- DIVF:  7 (7'b0000111)
+-- DIVF: 79 (7'b1001111)
 -- DIVQ:  4 (3'b100)
 -- 
--- FILTER_RANGE: 5 (3'b101)
-
+-- FILTER_RANGE: 1 (3'b001)
+-- 
 myPLL :: ("REFERENCECLK" ::: Clock inp 'Source)
       -> ("REFERENCERST" ::: Signal inp Bool)
-      -> ("CLK" ::: Clock outdom 'Source
+      -> ("PLLCLK" ::: Clock outdom 'Source
          ,"RST" ::: Reset outdom 'Asynchronous)
-myPLL = ice40Top d0 d7 d4 d5
-
--- System clock fed into FPGA
--- 100MHz => 10,000ps
-type ClkSys = 'Dom "system" 10000
-
--- PLL generated 50MHz clock
---  50MHz => 20,000ps
-type Clk50  = 'Dom "main" 20000
+--myPLL = ice40Top d0 d7 d4 d5
+myPLL = ice40Top d0 d79 d4 d1
 
 --  do (n-1) cycles of 0, then (n-1) cycles of 1, and repeat..
 flipper :: (Num a, Eq a) => Clock dom gated -> Reset dom sync -> a -> Signal dom Bit
@@ -57,7 +57,7 @@ blinky clk rst = flipper clk rst (24999999 :: Unsigned 32)
     , t_output = PortName "LED0"
     }) #-}
 topEntity :: Clock ClkSys 'Source
-          -> Signal Clk50 Bit
+          -> Signal ClkPLL Bit
 topEntity clk = let (clk', rst) = myPLL clk (pure True)
           in blinky clk' rst
 
